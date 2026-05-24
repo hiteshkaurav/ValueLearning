@@ -335,3 +335,543 @@ const STORY_SCRIPTS = {
         ]
     }
 };
+
+// Seed/Growth Garden initial slots state
+const SEED_SLOTS_DATA = [
+    { habitId: 'persisting', plantName: 'Sturdy Pine', levels: ['Seed', 'Sprout', 'Budding Tree', 'Golden Pine 🌲'] },
+    { habitId: 'impulsivity', plantName: 'Calm Fern', levels: ['Seed', 'Sprout', 'Swaying Fern', 'Breezy Fern 🌿'] },
+    { habitId: 'listening', plantName: 'Echo Orchid', levels: ['Seed', 'Sprout', 'Budding Orchid', 'Echo Orchid 🌸'] },
+    { habitId: 'flexibility', plantName: 'Flexi Willow', levels: ['Seed', 'Sprout', 'Weeping Willow', 'Flexi Willow 🌳'] },
+    { habitId: 'metacognition', plantName: 'Chameleon Rose', levels: ['Seed', 'Sprout', 'Colorbud', 'Mirror Rose 🌹'] },
+    { habitId: 'accuracy', plantName: 'True Lily', levels: ['Seed', 'Sprout', 'Lily Stem', 'Perfect Lily ⚜️'] },
+    { habitId: 'questioning', plantName: 'Lantern Bloom', levels: ['Seed', 'Sprout', 'Glowing Bud', 'Lantern Bloom 🪔'] },
+    { habitId: 'past_knowledge', plantName: 'Ancient Oak', levels: ['Seed', 'Sprout', 'Oak Sapling', 'Wisdom Oak 🌳'] },
+    { habitId: 'communication', plantName: 'Chime Flower', levels: ['Seed', 'Sprout', 'Budding Chime', 'Chime Flower 🔔'] },
+    { habitId: 'senses', plantName: 'Scout Poppy', levels: ['Seed', 'Sprout', 'Scented Bud', 'Scout Poppy 🌺'] },
+    { habitId: 'creating', plantName: 'Rainbow Tulip', levels: ['Seed', 'Sprout', 'Artistic Bud', 'Rainbow Tulip 🌷'] },
+    { habitId: 'wonderment', plantName: 'Cosmo Cosmos', levels: ['Seed', 'Sprout', 'Star Bud', 'Cosmos Star 🌼'] },
+    { habitId: 'risk_taking', plantName: 'Brave Clover', levels: ['Seed', 'Sprout', 'Three-Leaf', 'Lucky Four-Leaf 🍀'] },
+    { habitId: 'humour', plantName: 'Tickle Orchid', levels: ['Seed', 'Sprout', 'Giggling Bud', 'Giggle Orchid 🌻'] },
+    { habitId: 'interdependence', plantName: 'Hive Clover', levels: ['Seed', 'Sprout', 'Cluster Bud', 'Hive Clover ☘️'] },
+    { habitId: 'open_learning', plantName: 'Sproutling', levels: ['Seed', 'Sprout', 'Green Leaves', 'Sproutling 🌱'] }
+];
+
+// --- Initialization & Local Storage Synergies ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadProgress();
+    setupEventListeners();
+    determineDailyQuest();
+    renderMapMarkers();
+    renderStickerBook();
+    renderGarden();
+});
+
+// Setup Events listeners
+function setupEventListeners() {
+    // 1. Welcome Screen Elements
+    document.querySelectorAll('.age-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            document.querySelectorAll('.age-option').forEach(o => o.classList.remove('selected'));
+            const target = e.currentTarget;
+            target.classList.add('selected');
+            appState.player.age = target.dataset.age;
+        });
+    });
+
+    document.getElementById('start-adventure-btn').addEventListener('click', handleOnboarding);
+    document.getElementById('logo-trigger').addEventListener('click', () => showScreen('screen-map'));
+
+    // 2. Navigation Pills
+    document.querySelectorAll('.nav-pill').forEach(pill => {
+        pill.addEventListener('click', (e) => {
+            const targetScreen = e.currentTarget.dataset.target;
+            if (targetScreen) {
+                showScreen(targetScreen);
+            }
+        });
+    });
+
+    // 3. Parent Corner Links & Locks
+    document.getElementById('parent-btn').addEventListener('click', triggerParentLock);
+    
+    const navParent = document.getElementById('nav-parent-btn');
+    if (navParent) navParent.addEventListener('click', triggerParentLock);
+
+    document.getElementById('lock-cancel-btn').addEventListener('click', () => {
+        document.getElementById('parent-lock-modal').classList.remove('active');
+    });
+    document.getElementById('lock-submit-btn').addEventListener('click', verifyParentLock);
+    document.getElementById('parent-exit-btn').addEventListener('click', () => showScreen('screen-map'));
+
+    // 4. Map screen interaction card
+    document.getElementById('map-card-action-btn').addEventListener('click', startActiveQuest);
+    
+    // Hide map card click outside
+    document.getElementById('island-map-container').addEventListener('click', (e) => {
+        if (!e.target.closest('.map-marker') && !e.target.closest('#map-info-card')) {
+            document.getElementById('map-info-card').classList.add('hidden');
+        }
+    });
+
+    // 5. Quest story interactions
+    document.getElementById('quest-back-map-btn').addEventListener('click', () => {
+        showScreen('screen-map');
+    });
+
+    // 6. Reward & Reflection popup
+    document.getElementById('reward-claim-btn').addEventListener('click', claimRewardSticker);
+}
+
+// Router/Screen Switcher
+function showScreen(screenId) {
+    SCREENS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+    });
+    
+    const activeEl = document.getElementById(screenId);
+    if (activeEl) activeEl.classList.add('active');
+
+    // Update nav bar active state
+    document.querySelectorAll('.nav-pill').forEach(pill => {
+        if (pill.dataset.target === screenId) {
+            pill.classList.add('active');
+        } else {
+            pill.classList.remove('active');
+        }
+    });
+
+    // Sync Parent dashboard when opening it
+    if (screenId === 'screen-parent') {
+        syncParentDashboard();
+    }
+}
+
+// Onboarding execution
+function handleOnboarding() {
+    const nameInput = document.getElementById('player-name').value.trim();
+    if (!nameInput) {
+        alert("Please enter your lovely name first!");
+        return;
+    }
+    
+    appState.player.name = nameInput;
+    appState.player.streak = appState.player.streak || 1;
+    saveProgress();
+    
+    // Update headers
+    document.getElementById('app-header').style.display = 'flex';
+    document.getElementById('app-navigation').style.display = 'flex';
+    document.getElementById('player-badge').textContent = `🎒 Adventurer: ${appState.player.name}`;
+    
+    // Go to Map Screen
+    showScreen('screen-map');
+}
+
+// --- Daily Rotation Algorithm ---
+let dailyHabitId = 'persisting'; // Default daily quest
+
+function determineDailyQuest() {
+    const today = new Date();
+    // Predictable cycle through all 16 habits
+    const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 1)) / (86400000));
+    const habitIndex = dayOfYear % 16;
+    
+    const availableDeepQuests = ['persisting', 'impulsivity', 'listening'];
+    dailyHabitId = availableDeepQuests[habitIndex % availableDeepQuests.length];
+}
+
+// --- Render Map Markers & Coordinates ---
+function renderMapMarkers() {
+    const layer = document.getElementById('markers-layer');
+    if (!layer) return;
+    layer.innerHTML = '';
+
+    const coords = {
+        'persisting': { x: 78, y: 38 },     // Courage - Brave Cliffs
+        'impulsivity': { x: 62, y: 70 },    // Compassion - Gentle Valley
+        'listening': { x: 74, y: 18 },      // Collaboration - Harmony Hive
+        'flexibility': { x: 30, y: 72 },    // Creativity - Dreamers Peak
+        'metacognition': { x: 22, y: 32 },  // Curiosity - Whispering Woods
+        'accuracy': { x: 88, y: 48 },       // Courage
+        'questioning': { x: 38, y: 22 },    // Curiosity
+        'past_knowledge': { x: 18, y: 16 }, // Curiosity
+        'communication': { x: 66, y: 28 },  // Collaboration
+        'senses': { x: 44, y: 36 },         // Curiosity
+        'creating': { x: 48, y: 75 },       // Creativity
+        'wonderment': { x: 28, y: 48 },     // Curiosity
+        'risk_taking': { x: 86, y: 64 },    // Courage
+        'humour': { x: 38, y: 62 },         // Creativity
+        'interdependence': { x: 82, y: 12 },// Collaboration
+        'open_learning': { x: 12, y: 48 }   // Curiosity
+    };
+
+    HABITS_OF_MIND.forEach(habit => {
+        const marker = document.createElement('div');
+        marker.className = 'map-marker';
+        
+        // Mark as completed if appropriate
+        if (appState.player.completedQuests[habit.id]) {
+            marker.classList.add('completed');
+        }
+
+        // Highlight if daily quest
+        if (habit.id === dailyHabitId) {
+            marker.classList.add('active-quest');
+        }
+
+        const pos = coords[habit.id] || { x: 50, y: 50 };
+        marker.style.left = `${pos.x}%`;
+        marker.style.top = `${pos.y}%`;
+
+        marker.innerHTML = `
+            <div class="marker-avatar">
+                ${habit.emoji}
+                ${habit.id === dailyHabitId ? '<span class="active-badge">QUEST</span>' : ''}
+            </div>
+        `;
+
+        marker.addEventListener('click', (e) => {
+            e.stopPropagation();
+            displayMapCard(habit);
+        });
+
+        layer.appendChild(marker);
+    });
+}
+
+// Display Map Info Card
+function displayMapCard(habit) {
+    const card = document.getElementById('map-info-card');
+    const avatar = document.getElementById('map-card-avatar');
+    const name = document.getElementById('map-card-name');
+    const habitTxt = document.getElementById('map-card-habit');
+    const tag = document.getElementById('map-card-value-tag');
+    const btn = document.getElementById('map-card-action-btn');
+
+    avatar.textContent = habit.emoji;
+    name.textContent = `${habit.name} the ${habit.animal}`;
+    habitTxt.innerHTML = `<strong>Habit of Mind:</strong> ${habit.habit}<br><span style="font-size:0.8rem; color:var(--text-muted);">${habit.desc}</span>`;
+    
+    // Stylize tag based on value
+    tag.textContent = `${getValueEmoji(habit.value)} ${capitalize(habit.value)}`;
+    tag.style.backgroundColor = `var(--color-${habit.value}-soft)`;
+    tag.style.color = `var(--color-${habit.value}-dark)`;
+
+    appState.activeQuest = habit;
+
+    const isDeepQuest = ['persisting', 'impulsivity', 'listening'].includes(habit.id);
+    
+    if (isDeepQuest) {
+        btn.textContent = "Start Story Quest 📖";
+        btn.style.display = 'block';
+    } else {
+        btn.textContent = "Unlock Story Soon ✨";
+        btn.style.display = 'none';
+    }
+
+    card.classList.remove('hidden');
+}
+
+function getValueEmoji(val) {
+    const map = { curiosity: '🔍', collaboration: '🤝', creativity: '🎨', compassion: '💚', courage: '🦁' };
+    return map[val] || '🌟';
+}
+
+function capitalize(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Start active storybook
+function startActiveQuest() {
+    if (!appState.activeQuest) return;
+    
+    document.getElementById('map-info-card').classList.add('hidden');
+    
+    const layout = document.getElementById('quest-theme-container');
+    layout.className = `quest-layout quest-theme-${appState.activeQuest.value}`;
+
+    appState.currentQuestPage = 0;
+    renderQuestPage();
+    showScreen('screen-quest');
+}
+
+function renderQuestPage() {
+    const quest = STORY_SCRIPTS[appState.activeQuest.id];
+    if (!quest) return;
+
+    const page = quest.pages[appState.currentQuestPage];
+    if (!page) return;
+
+    document.getElementById('quest-page-tracker').textContent = `Story of ${appState.activeQuest.name} · Page ${appState.currentQuestPage + 1} of ${quest.pages.length}`;
+
+    const age = appState.player.age || '5-7';
+    const textHtml = page.text[age] || page.text['5-7'];
+    document.getElementById('quest-story-text').innerHTML = `<p>${textHtml}</p>`;
+
+    const choicesBox = document.getElementById('quest-story-choices');
+    choicesBox.innerHTML = '';
+
+    if (page.choices && page.choices.length > 0) {
+        page.choices.forEach(ch => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.innerHTML = `<span>👉</span> ${ch.text}`;
+            btn.addEventListener('click', () => {
+                if (ch.action === 'completeQuest') {
+                    triggerQuestReward();
+                } else {
+                    appState.currentQuestPage = ch.nextPage;
+                    renderQuestPage();
+                }
+            });
+            choicesBox.appendChild(btn);
+        });
+    }
+
+    const rightPane = document.getElementById('quest-interactive-panel');
+    rightPane.innerHTML = '';
+
+    if (page.game) {
+        loadMiniGame(page.game, rightPane);
+    } else {
+        rightPane.innerHTML = `
+            <div class="illustration-box" style="animation: float 4s ease-in-out infinite;">
+                ${page.illustration}
+            </div>
+            <p style="font-family: var(--font-header); font-weight: 700; color: var(--text-muted); font-size: 1.05rem; text-align: center; margin-top: 10px;">
+                ${appState.activeQuest.emoji} ${appState.activeQuest.name} the ${appState.activeQuest.animal}
+            </p>
+        `;
+    }
+}
+
+// Audio Tone Synthesis
+function playTone(frequency, durationMs) {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        
+        gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + durationMs / 1000);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        setTimeout(() => {
+            oscillator.stop();
+            audioCtx.close();
+        }, durationMs);
+    } catch (e) {
+        console.log("Audio not enabled yet", e);
+    }
+}
+
+// Reward trigger
+function triggerQuestReward() {
+    const modal = document.getElementById('reward-modal');
+    const glow = document.getElementById('reward-gem-glow');
+    const gem = document.getElementById('reward-gem-emoji');
+    const sticker = document.getElementById('reward-character-sticker');
+    const text = document.getElementById('reward-text');
+    const reflectionLabel = document.getElementById('reward-reflection-label');
+
+    const h = appState.activeQuest;
+
+    document.getElementById('reward-reflection-input').value = '';
+
+    glow.style.backgroundColor = `var(--color-${h.value})`;
+    gem.textContent = getGemEmoji(h.value);
+    sticker.textContent = h.emoji;
+    text.innerHTML = `You earned a shining <strong>${capitalize(h.value)} Gem</strong> and placed <strong>${h.name}'s Sticker</strong> into your Sticker Book!`;
+
+    const reflectionQuestions = {
+        'persisting': "What was something hard that you tried to do today? How did you keep going?",
+        'impulsivity': "Next time you feel excited or angry, how can you practice pausing?",
+        'listening': "Think of someone you love. How can you be a better listening friend to them?",
+        'default': `How can you practice ${h.habit} tomorrow?`
+    };
+    reflectionLabel.textContent = reflectionQuestions[h.id] || reflectionQuestions['default'];
+
+    playTone(523.25, 100);
+    setTimeout(() => playTone(659.25, 100), 100);
+    setTimeout(() => playTone(783.99, 300), 200);
+
+    modal.classList.add('active');
+}
+
+function getGemEmoji(val) {
+    const map = { curiosity: '🟡', collaboration: '🔵', creativity: '🟣', compassion: '🟢', courage: '🟠' };
+    return map[val] || '✨';
+}
+
+function claimRewardSticker() {
+    const reflectionText = document.getElementById('reward-reflection-input').value.trim();
+    const h = appState.activeQuest;
+
+    appState.player.completedQuests[h.id] = (appState.player.completedQuests[h.id] || 0) + 1;
+    appState.player.gemCounts[h.value] = (appState.player.gemCounts[h.value] || 0) + 1;
+    
+    if (reflectionText) {
+        appState.player.reflections[h.id] = reflectionText;
+    }
+
+    const todayStr = new Date().toDateString();
+    if (appState.player.lastPlayedDate !== todayStr) {
+        appState.player.streak = (appState.player.streak || 0) + 1;
+        appState.player.lastPlayedDate = todayStr;
+    }
+
+    saveProgress();
+
+    renderMapMarkers();
+    renderStickerBook();
+    renderGarden();
+
+    document.getElementById('reward-modal').classList.remove('active');
+    showScreen('screen-map');
+}
+
+// Render Garden
+function renderGarden() {
+    const container = document.getElementById('garden-plots-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    SEED_SLOTS_DATA.forEach(plot => {
+        const habit = HABITS_OF_MIND.find(h => h.id === plot.habitId);
+        if (!habit) return;
+
+        const count = appState.player.completedQuests[plot.habitId] || 0;
+        let growthLevel = 'Locked';
+        let badgeClass = 'badge-locked';
+        let plantIcon = '🟤';
+
+        if (count === 1) {
+            growthLevel = 'Sprout 🌱';
+            badgeClass = 'badge-sprout';
+            plantIcon = '🌱';
+        } else if (count === 2) {
+            growthLevel = 'Growing 🌿';
+            badgeClass = 'badge-growing';
+            plantIcon = '🌿';
+        } else if (count >= 3) {
+            growthLevel = plot.levels[3];
+            badgeClass = 'badge-bloomed';
+            plantIcon = plot.levels[3].split(' ').pop();
+        }
+
+        const plotCard = document.createElement('div');
+        plotCard.className = 'garden-plot';
+        plotCard.innerHTML = `
+            <span class="growth-badge ${badgeClass}">${growthLevel}</span>
+            <div class="plant-avatar">
+                <span style="font-size: 3.8rem; line-height: 1;">${plantIcon}</span>
+            </div>
+            <h4>${plot.plantName}</h4>
+            <p>${habit.habit}</p>
+        `;
+
+        plotCard.addEventListener('click', () => {
+            alert(`${plot.plantName} grows as you practice ${habit.habit}! Current practices: ${count}`);
+        });
+
+        container.appendChild(plotCard);
+    });
+}
+
+// Render Collection / Sticker book
+function renderStickerBook() {
+    const container = document.getElementById('collection-slots-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    HABITS_OF_MIND.forEach(habit => {
+        const isUnlocked = !!appState.player.completedQuests[habit.id];
+        const slot = document.createElement('div');
+        slot.className = `sticker-slot ${isUnlocked ? 'unlocked' : ''}`;
+        
+        slot.innerHTML = `
+            <span class="slot-gem">${getGemEmoji(habit.value)}</span>
+            <span class="slot-emoji">${isUnlocked ? habit.emoji : '❓'}</span>
+            <span class="slot-name">${habit.name} the ${habit.animal}</span>
+            ${isUnlocked ? `<span style="font-size: 0.7rem; color: var(--color-${habit.value}-dark); font-weight: 700; background-color: var(--color-${habit.value}-soft); padding: 2px 6px; border-radius: 8px; margin-top: 4px;">${habit.habit}</span>` : ''}
+        `;
+
+        slot.addEventListener('click', () => {
+            if (isUnlocked) {
+                const reflection = appState.player.reflections[habit.id] || "No reflection saved yet.";
+                alert(`✨ ${habit.name} says: "${habit.desc}"\n\nYour reflection:\n"${reflection}"`);
+            } else {
+                alert(`This sticker is locked! Play the quest for ${habit.habit} on its active day to unlock ${habit.name}!`);
+            }
+        });
+
+        container.appendChild(slot);
+    });
+}
+
+// Parent dashboard math locks
+function triggerParentLock() {
+    const num1 = Math.floor(Math.random() * 8) + 4;
+    const num2 = Math.floor(Math.random() * 8) + 3;
+    appState.lockMathAnswer = num1 + num2;
+
+    document.getElementById('lock-math-question').textContent = `${num1} + ${num2} = ?`;
+    document.getElementById('lock-math-input').value = '';
+    document.getElementById('parent-lock-modal').classList.add('active');
+}
+
+function verifyParentLock() {
+    const inputVal = parseInt(document.getElementById('lock-math-input').value.trim());
+    if (inputVal === appState.lockMathAnswer) {
+        document.getElementById('parent-lock-modal').classList.remove('active');
+        showScreen('screen-parent');
+    } else {
+        alert("Oops, that is not the right answer! Let's try again!");
+        triggerParentLock();
+    }
+}
+
+function syncParentDashboard() {
+    document.getElementById('parent-child-name').textContent = appState.player.name || "Young Explorer";
+    document.getElementById('parent-child-age').textContent = `Ages ${appState.player.age}`;
+    
+    const totalCompletedCount = Object.keys(appState.player.completedQuests).length;
+    document.getElementById('parent-total-completed').textContent = `${totalCompletedCount} / 16`;
+    document.getElementById('parent-streak-count').textContent = `${appState.player.streak} Day${appState.player.streak === 1 ? '' : 's'}`;
+
+    document.getElementById('parent-gem-curiosity').textContent = appState.player.gemCounts.curiosity;
+    document.getElementById('parent-gem-collaboration').textContent = appState.player.gemCounts.collaboration;
+    document.getElementById('parent-gem-creativity').textContent = appState.player.gemCounts.creativity;
+    document.getElementById('parent-gem-compassion').textContent = appState.player.gemCounts.compassion;
+    document.getElementById('parent-gem-courage').textContent = appState.player.gemCounts.courage;
+}
+
+// Data synchronization
+function saveProgress() {
+    localStorage.setItem('mindspark_quest_state', JSON.stringify(appState.player));
+}
+
+function loadProgress() {
+    const saved = localStorage.getItem('mindspark_quest_state');
+    if (saved) {
+        try {
+            appState.player = JSON.parse(saved);
+            
+            if (appState.player.name) {
+                document.getElementById('app-header').style.display = 'flex';
+                document.getElementById('app-navigation').style.display = 'flex';
+                document.getElementById('player-badge').textContent = `🎒 Adventurer: ${appState.player.name}`;
+                showScreen('screen-map');
+            }
+        } catch (e) {
+            console.error("Error loading saved state", e);
+        }
+    }
+}
