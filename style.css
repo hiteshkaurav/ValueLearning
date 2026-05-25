@@ -1436,6 +1436,12 @@ header {
     gap: 20px;
 }
 
+#parent-conversation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .conversation-card {
     background-color: white;
     border: 2px solid var(--border-color);
@@ -1473,7 +1479,7 @@ header {
 
 .sheet-cards-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 20px;
     margin-top: 16px;
 }
@@ -1589,6 +1595,11 @@ header {
     .garden-grid, .collection-grid {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    .sheet-cards-container,
+    .gem-summary {
+        grid-template-columns: repeat(3, 1fr);
+    }
     
     .parent-grid {
         grid-template-columns: 1fr;
@@ -1613,7 +1624,8 @@ header {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .sheet-cards-container {
+    .sheet-cards-container,
+    .gem-summary {
         grid-template-columns: 1fr;
     }
     

@@ -1105,6 +1105,66 @@ function verifyParentLock() {
     }
 }
 
+function getParentConversationPrompt(habit) {
+    const prompts = {
+        persisting: "What was something tricky you kept working on today, and what helped you keep going?",
+        impulsivity: "When did you pause before acting today? What did your body feel like after the pause?",
+        listening: "Who did you listen to carefully today, and how could you tell how they were feeling?",
+        flexibility: "What problem could you solve in more than one way this week?",
+        metacognition: "What did you notice about how your brain learns best?",
+        accuracy: "Where could checking one more time make your work stronger?",
+        questioning: "What is one question you asked today that helped you learn?",
+        past_knowledge: "What old learning helped you solve something new?",
+        communication: "How did you make your idea clear for someone else?",
+        senses: "What did your senses notice today that your brain almost missed?",
+        creating: "What would you invent or improve if you had one quiet hour?",
+        wonderment: "What made you feel curious, amazed, or grateful today?",
+        risk_taking: "What small brave thing could you try while staying safe?",
+        humour: "When did laughing or smiling help a mistake feel easier?",
+        interdependence: "Who helped your thinking today, and who did you help?",
+        open_learning: "What is one thing you want to keep practicing tomorrow?"
+    };
+
+    return prompts[habit.id] || `How can you practice ${habit.habit} at home this week?`;
+}
+
+function syncParentConversationStarters() {
+    const container = document.getElementById('parent-conversation-list');
+    if (!container) return;
+
+    const completed = HABITS_OF_MIND.filter(habit => appState.player.completedQuests[habit.id]);
+    const habitsToShow = completed.length > 0
+        ? completed.slice(-3).reverse()
+        : HABITS_OF_MIND.filter(habit => ['persisting', 'impulsivity', 'listening'].includes(habit.id));
+
+    container.innerHTML = habitsToShow.map(habit => `
+        <div class="conversation-card">
+            <h4>${habit.emoji} Reinforcing "${habit.habit}" (${capitalize(habit.value)})</h4>
+            <p>"I saw ${appState.player.name || 'your child'} practiced with ${habit.name}. Ask: '${getParentConversationPrompt(habit)}'"</p>
+        </div>
+    `).join('');
+}
+
+function syncParentActivityCards() {
+    const container = document.getElementById('parent-activity-list');
+    if (!container) return;
+
+    const activities = [
+        { value: 'curiosity', title: 'Curiosity Sensory Walk', text: 'Take a 10-minute quiet walk. Find 3 things you can hear, 3 you can see, and 3 you can smell or feel.' },
+        { value: 'collaboration', title: 'Collaboration Mirror Challenge', text: 'Face each other. One person leads slow motions while the other mirrors them, then switch leaders.' },
+        { value: 'creativity', title: 'Creativity Scribble Studio', text: 'Draw a random scribble and turn it into an animal, tool, place, or new invention.' },
+        { value: 'compassion', title: 'Compassion Pause Practice', text: 'Name one feeling from the day, take three slow breaths, and choose one kind response.' },
+        { value: 'courage', title: 'Courage Tiny Step', text: 'Pick one hard-but-safe task and break it into the smallest first step you can try today.' }
+    ];
+
+    container.innerHTML = activities.map(activity => `
+        <div class="sheet-card">
+            <h4 style="color: var(--color-${activity.value}-dark);">${getValueEmoji(activity.value)} ${activity.title}</h4>
+            <p>${activity.text}</p>
+        </div>
+    `).join('');
+}
+
 function syncParentDashboard() {
     document.getElementById('parent-child-name').textContent = appState.player.name || "Young Explorer";
     document.getElementById('parent-child-age').textContent = `Ages ${appState.player.age}`;
@@ -1118,6 +1178,9 @@ function syncParentDashboard() {
     document.getElementById('parent-gem-creativity').textContent = appState.player.gemCounts.creativity;
     document.getElementById('parent-gem-compassion').textContent = appState.player.gemCounts.compassion;
     document.getElementById('parent-gem-courage').textContent = appState.player.gemCounts.courage;
+
+    syncParentConversationStarters();
+    syncParentActivityCards();
 }
 
 // Data synchronization
