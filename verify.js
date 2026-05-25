@@ -18,10 +18,12 @@ function assert(condition, message) {
 const htmlPath = path.join(__dirname, 'index.html');
 const cssPath = path.join(__dirname, 'style.css');
 const jsPath = path.join(__dirname, 'app.js');
+const smokePath = path.join(__dirname, 'smoke-test.js');
 
 assert(fs.existsSync(htmlPath), "index.html exists");
 assert(fs.existsSync(cssPath), "style.css exists");
 assert(fs.existsSync(jsPath), "app.js exists");
+assert(fs.existsSync(smokePath), "smoke-test.js exists");
 
 if (failed) {
     process.exit(1);
@@ -30,6 +32,7 @@ if (failed) {
 const html = fs.readFileSync(htmlPath, 'utf8');
 const css = fs.readFileSync(cssPath, 'utf8');
 const js = fs.readFileSync(jsPath, 'utf8');
+const smoke = fs.readFileSync(smokePath, 'utf8');
 
 // 2. Validate index.html Structure
 console.log("\n--- Checking index.html markup ---");
@@ -124,6 +127,9 @@ miniQuestIds.forEach(id => {
 assert(js.includes('sparkle-burst'), "Garden click feedback uses a visual burst");
 assert(js.includes('collection-gem-summary'), "Sticker book renders gem summary totals");
 assert(['curiosity', 'collaboration', 'creativity', 'compassion', 'courage'].every(value => js.includes(`value: '${value}'`)), "Parent activity cards cover all five values");
+assert(smoke.includes('MindSpark Quest smoke test passed'), "Smoke test includes a success marker");
+assert(smoke.includes('stone_weaver') && smoke.includes('habit_challenge'), "Smoke test covers deep and generic mini-games");
+assert(smoke.includes('parent dashboard') || smoke.includes('Parent Dashboard'), "Smoke test covers parent dashboard flow");
 
 // 6. Final Report
 console.log("\n-------------------------------------------");

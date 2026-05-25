@@ -19,6 +19,7 @@ Run the lightweight automated checks:
 ```bash
 node --check app.js
 node verify.js
+node smoke-test.js
 ```
 
 Manual smoke test:
