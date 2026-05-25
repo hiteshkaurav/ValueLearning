@@ -477,8 +477,7 @@ function determineDailyQuest() {
     const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 1)) / (86400000));
     const habitIndex = dayOfYear % 16;
     
-    const availableDeepQuests = ['persisting', 'impulsivity', 'listening'];
-    dailyHabitId = availableDeepQuests[habitIndex % availableDeepQuests.length];
+    dailyHabitId = HABITS_OF_MIND[habitIndex].id;
 }
 
 // --- Render Map Markers & Coordinates ---
@@ -551,7 +550,13 @@ function displayMapCard(habit) {
 
     avatar.textContent = habit.emoji;
     name.textContent = `${habit.name} the ${habit.animal}`;
-    habitTxt.innerHTML = `<strong>Habit of Mind:</strong> ${habit.habit}<br><span style="font-size:0.8rem; color:var(--text-muted);">${habit.desc}</span>`;
+    const isDeepQuest = ['persisting', 'impulsivity', 'listening'].includes(habit.id);
+    const dailyCopy = habit.id === dailyHabitId ? '<br><span style="font-size:0.8rem; color:var(--color-courage-dark); font-weight:800;">Today\'s Daily Quest highlight!</span>' : '';
+    const previewCopy = isDeepQuest
+        ? 'Rocky, Sage, and Luna story quests are open for practice any day.'
+        : `This is ${habit.name}'s ${habit.biome} preview. ${habit.name} teaches ${habit.habit}; a full story quest is coming soon.`;
+
+    habitTxt.innerHTML = `<strong>Habit of Mind:</strong> ${habit.habit}<br><span style="font-size:0.8rem; color:var(--text-muted);">${habit.desc} ${previewCopy}</span>${dailyCopy}`;
     
     // Stylize tag based on value
     tag.textContent = `${getValueEmoji(habit.value)} ${capitalize(habit.value)}`;
@@ -560,13 +565,11 @@ function displayMapCard(habit) {
 
     appState.activeQuest = habit;
 
-    const isDeepQuest = ['persisting', 'impulsivity', 'listening'].includes(habit.id);
-    
     if (isDeepQuest) {
-        btn.textContent = "Start Story Quest 📖";
+        btn.textContent = "Start Story Quest";
         btn.style.display = 'block';
     } else {
-        btn.textContent = "Unlock Story Soon ✨";
+        btn.textContent = "Preview Only";
         btn.style.display = 'none';
     }
 
@@ -932,6 +935,29 @@ function getGemEmoji(val) {
     return map[val] || '✨';
 }
 
+function getHabitRule(habit) {
+    const rules = {
+        persisting: "Never give up; try another way.",
+        impulsivity: "Pause, breathe, then choose.",
+        listening: "Listen with ears, eyes, and heart.",
+        flexibility: "Look at the problem from another side.",
+        metacognition: "Notice what your brain is doing.",
+        accuracy: "Check carefully and improve your work.",
+        questioning: "Ask brave questions to learn more.",
+        past_knowledge: "Use what you know to solve what is new.",
+        communication: "Share ideas clearly and kindly.",
+        senses: "Use your senses like learning tools.",
+        creating: "Imagine, build, test, and try again.",
+        wonderment: "Stay amazed by the world around you.",
+        risk_taking: "Try new things with care.",
+        humour: "Let a smile help you learn from mistakes.",
+        interdependence: "Great thinking grows with teamwork.",
+        open_learning: "Keep growing every day."
+    };
+
+    return rules[habit.id] || habit.desc;
+}
+
 function claimRewardSticker() {
     const reflectionText = document.getElementById('reward-reflection-input').value.trim();
     const h = appState.activeQuest;
@@ -997,10 +1023,17 @@ function renderGarden() {
             </div>
             <h4>${plot.plantName}</h4>
             <p>${habit.habit}</p>
+            <span class="garden-rule" aria-live="polite">${getHabitRule(habit)}</span>
         `;
 
         plotCard.addEventListener('click', () => {
-            alert(`${plot.plantName} grows as you practice ${habit.habit}! Current practices: ${count}`);
+            plotCard.classList.remove('sparkle-burst');
+            void plotCard.offsetWidth;
+            plotCard.classList.add('sparkle-burst');
+            const rule = plotCard.querySelector('.garden-rule');
+            rule.textContent = count > 0
+                ? `${habit.name}'s reminder: ${getHabitRule(habit)}`
+                : `${habit.name}'s seed is waiting: ${getHabitRule(habit)}`;
         });
 
         container.appendChild(plotCard);
@@ -1012,6 +1045,18 @@ function renderStickerBook() {
     const container = document.getElementById('collection-slots-container');
     if (!container) return;
     container.innerHTML = '';
+
+    const summary = document.getElementById('collection-gem-summary');
+    if (summary) {
+        const values = ['curiosity', 'collaboration', 'creativity', 'compassion', 'courage'];
+        summary.innerHTML = values.map(value => `
+            <div class="gem-summary-item gem-summary-${value}">
+                <span class="gem-summary-emoji">${getGemEmoji(value)}</span>
+                <span class="gem-summary-value">${appState.player.gemCounts[value] || 0}</span>
+                <span class="gem-summary-label">${capitalize(value)}</span>
+            </div>
+        `).join('');
+    }
 
     HABITS_OF_MIND.forEach(habit => {
         const isUnlocked = !!appState.player.completedQuests[habit.id];
