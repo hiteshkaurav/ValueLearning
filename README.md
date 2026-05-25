@@ -13,6 +13,20 @@ Teaching children aged 5-10 the **16 Habits of Mind** through interactive storyb
 ## How to Play
 Just double-click `index.html` in your browser to begin the adventure. No installation or dev server is required!
 
+## Verification
+Run the lightweight automated checks:
+
+```bash
+node --check app.js
+node verify.js
+```
+
+Manual smoke test:
+1. Enter a child name, choose an age group, and open the island map.
+2. Complete Rocky, Sage, and Luna through their mini-games.
+3. Confirm stickers, gems, garden growth, reflections, and Parent Corner stats update.
+4. Refresh the page and confirm progress persists from local storage.
+
 ## Project Structure
 - `index.html`: Core HTML structure and layout elements.
 - `style.css`: Playful storybook styling, warm colors, animations, and transitions.
