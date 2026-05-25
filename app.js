@@ -806,10 +806,16 @@ function renderBreathingBalloonGame(container) {
     button.addEventListener('pointerdown', startBreath);
     button.addEventListener('pointerup', finishBreath);
     button.addEventListener('pointerleave', finishBreath);
-    button.addEventListener('click', () => {
-        if (!breathStarted && breathCount < 3) {
+    button.addEventListener('keydown', (event) => {
+        if (event.code === 'Space' || event.code === 'Enter') {
+            event.preventDefault();
             startBreath();
-            window.setTimeout(finishBreath, 350);
+        }
+    });
+    button.addEventListener('keyup', (event) => {
+        if (event.code === 'Space' || event.code === 'Enter') {
+            event.preventDefault();
+            finishBreath();
         }
     });
 
