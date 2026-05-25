@@ -132,6 +132,12 @@ h1, h2, h3, h4, h5, h6 {
     50% { opacity: 1; transform: scale(1.2); }
 }
 
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
 /* --- Global Elements & Headers --- */
 header {
     display: flex;
@@ -798,10 +804,29 @@ header {
     text-align: center;
 }
 
+.game-instruction,
+.game-feedback {
+    color: var(--text-muted);
+    font-weight: 700;
+    text-align: center;
+    max-width: 360px;
+}
+
+.game-feedback {
+    background-color: rgba(255,255,255,0.82);
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-small);
+    padding: 10px 14px;
+}
+
+.mini-game-continue.hidden {
+    display: none;
+}
+
 /* Game: Stone Path Weaver (Rocky) */
 .stone-game-board {
     display: grid;
-    grid-template-columns: repeat(4, 70px);
+    grid-template-columns: repeat(4, minmax(54px, 70px));
     gap: 12px;
     background-color: #EDF2F7;
     padding: 16px;
@@ -812,8 +837,8 @@ header {
 }
 
 .stone-slot {
-    width: 70px;
-    height: 70px;
+    width: 100%;
+    aspect-ratio: 1;
     background-color: #E2E8F0;
     border: 2px dashed var(--text-muted);
     border-radius: 12px;
@@ -857,6 +882,12 @@ header {
     transform: scale(1.1) translateY(-2px);
 }
 
+.stone-choice.selected {
+    background-color: var(--color-courage-soft);
+    border-color: var(--color-courage);
+    box-shadow: 0 0 0 4px rgba(237, 137, 54, 0.16);
+}
+
 /* Game: Three Breaths Balloon (Sage) */
 .balloon-area {
     display: flex;
@@ -876,6 +907,10 @@ header {
     transition: transform 0.4s ease;
 }
 
+.balloon-svg-wrap.inflating {
+    transform: scale(1.28);
+}
+
 .balloon-btn {
     width: 80px;
     height: 80px;
@@ -893,6 +928,11 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.balloon-btn:disabled {
+    opacity: 0.68;
+    cursor: default;
 }
 
 .balloon-btn:active {
@@ -933,6 +973,20 @@ header {
     border-color: var(--color-collaboration);
     background-color: var(--color-collaboration-soft);
     transform: translateY(-3px);
+}
+
+.emotion-card.correct {
+    border-color: var(--color-compassion);
+    background-color: var(--color-compassion-soft);
+}
+
+.emotion-card.try-again {
+    border-color: var(--color-courage);
+    animation: shake 0.25s ease-in-out;
+}
+
+.emotion-card:disabled {
+    cursor: default;
 }
 
 .emotion-emoji {

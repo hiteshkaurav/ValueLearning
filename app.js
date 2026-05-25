@@ -646,6 +646,228 @@ function renderQuestPage() {
     }
 }
 
+function goToNextQuestPage() {
+    const quest = STORY_SCRIPTS[appState.activeQuest.id];
+    if (!quest) return;
+
+    appState.currentQuestPage = Math.min(appState.currentQuestPage + 1, quest.pages.length - 1);
+    renderQuestPage();
+}
+
+function loadMiniGame(gameType, container) {
+    const gameLoaders = {
+        stone_weaver: renderStoneWeaverGame,
+        breathing_balloon: renderBreathingBalloonGame,
+        emotion_soundboard: renderEmotionSoundboardGame
+    };
+
+    const loader = gameLoaders[gameType];
+    if (!loader) {
+        container.innerHTML = `
+            <div class="game-container">
+                <h3 class="game-title">Quest activity coming soon</h3>
+                <button class="btn btn-primary" type="button" id="mini-game-continue-btn">Continue Story</button>
+            </div>
+        `;
+        document.getElementById('mini-game-continue-btn').addEventListener('click', goToNextQuestPage);
+        return;
+    }
+
+    loader(container);
+}
+
+function renderStoneWeaverGame(container) {
+    const stones = ['circle', 'square', 'triangle'];
+    const stoneIcons = {
+        circle: '●',
+        square: '■',
+        triangle: '▲'
+    };
+    const solution = ['circle', 'square', 'triangle', 'circle'];
+    const placed = new Array(solution.length).fill(null);
+    let selectedStone = stones[0];
+
+    container.innerHTML = `
+        <div class="game-container" data-game="stone_weaver">
+            <h3 class="game-title">Stone Path Weaver</h3>
+            <p class="game-instruction">Choose a stone, then fill the path in this order: round, square, triangle, round.</p>
+            <div class="stone-game-board" id="stone-game-board" aria-label="Stone path slots">
+                ${solution.map((_, index) => `
+                    <button class="stone-slot" type="button" data-index="${index}" aria-label="Empty stone slot ${index + 1}"></button>
+                `).join('')}
+            </div>
+            <div class="stone-palette" aria-label="Stone choices">
+                ${stones.map((stone, index) => `
+                    <button class="stone-choice ${index === 0 ? 'selected' : ''}" type="button" data-stone="${stone}" aria-label="${stone} stone">${stoneIcons[stone]}</button>
+                `).join('')}
+            </div>
+            <p class="game-feedback" id="stone-feedback">Tap a shape, then tap an empty step.</p>
+            <button class="btn btn-primary mini-game-continue hidden" type="button" id="stone-continue-btn">Rocky can cross now!</button>
+        </div>
+    `;
+
+    const feedback = document.getElementById('stone-feedback');
+    const continueBtn = document.getElementById('stone-continue-btn');
+
+    document.querySelectorAll('.stone-choice').forEach(choice => {
+        choice.addEventListener('click', () => {
+            selectedStone = choice.dataset.stone;
+            document.querySelectorAll('.stone-choice').forEach(btn => btn.classList.remove('selected'));
+            choice.classList.add('selected');
+            feedback.textContent = `Selected ${selectedStone} stone.`;
+        });
+    });
+
+    document.querySelectorAll('.stone-slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+            const index = Number(slot.dataset.index);
+            placed[index] = selectedStone;
+            slot.textContent = stoneIcons[selectedStone];
+            slot.classList.add('filled');
+            slot.setAttribute('aria-label', `${selectedStone} stone slot ${index + 1}`);
+
+            const isComplete = placed.every(Boolean);
+            const isCorrect = placed.every((stone, stoneIndex) => stone === solution[stoneIndex]);
+
+            if (!isComplete) {
+                feedback.textContent = "Good experimenting. Keep building the path.";
+            } else if (isCorrect) {
+                feedback.textContent = "The stepping stones feel steady. Rocky found a new way forward!";
+                continueBtn.classList.remove('hidden');
+                playTone(659.25, 160);
+            } else {
+                feedback.textContent = "Those stones wobble. Rocky shrugs: let's try a different order.";
+                placed.fill(null);
+                document.querySelectorAll('.stone-slot').forEach(resetSlot => {
+                    resetSlot.textContent = '';
+                    resetSlot.classList.remove('filled');
+                });
+                playTone(220, 120);
+            }
+        });
+    });
+
+    continueBtn.addEventListener('click', goToNextQuestPage);
+}
+
+function renderBreathingBalloonGame(container) {
+    let breathCount = 0;
+    let breathStarted = false;
+
+    container.innerHTML = `
+        <div class="game-container" data-game="breathing_balloon">
+            <h3 class="game-title">The Three Breaths Balloon</h3>
+            <div class="balloon-area">
+                <div class="balloon-svg-wrap" id="balloon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 160 160" width="160" height="160">
+                        <circle cx="80" cy="80" r="44" fill="var(--color-compassion-soft)" stroke="var(--color-compassion)" stroke-width="5" />
+                        <path d="M80 125 L70 145 L90 145 Z" fill="var(--color-compassion)" />
+                    </svg>
+                </div>
+                <button class="balloon-btn" type="button" id="breath-btn" aria-label="Hold or tap for a calm breath">Hold<br>Breathe</button>
+                <div class="breath-counter" id="breath-counter">0 / 3 breaths</div>
+                <p class="game-feedback" id="breath-feedback">Hold the button, then let go slowly. Tapping also counts.</p>
+                <button class="btn btn-primary mini-game-continue hidden" type="button" id="breath-continue-btn">The pie is cool now!</button>
+            </div>
+        </div>
+    `;
+
+    const wrap = document.getElementById('balloon-wrap');
+    const button = document.getElementById('breath-btn');
+    const counter = document.getElementById('breath-counter');
+    const feedback = document.getElementById('breath-feedback');
+    const continueBtn = document.getElementById('breath-continue-btn');
+
+    const finishBreath = () => {
+        if (!breathStarted) return;
+        breathStarted = false;
+        wrap.classList.remove('inflating');
+        breathCount = Math.min(breathCount + 1, 3);
+        counter.textContent = `${breathCount} / 3 breaths`;
+        feedback.textContent = breathCount < 3 ? "Nice pause. Take another slow breath with Sage." : "Sage feels calm, patient, and ready to wait.";
+        playTone(392 + (breathCount * 40), 140);
+
+        if (breathCount >= 3) {
+            continueBtn.classList.remove('hidden');
+            button.disabled = true;
+        }
+    };
+
+    const startBreath = () => {
+        if (breathCount >= 3 || breathStarted) return;
+        breathStarted = true;
+        wrap.classList.add('inflating');
+        feedback.textContent = "Inhale slowly... now release when you are ready.";
+    };
+
+    button.addEventListener('pointerdown', startBreath);
+    button.addEventListener('pointerup', finishBreath);
+    button.addEventListener('pointerleave', finishBreath);
+    button.addEventListener('click', () => {
+        if (!breathStarted && breathCount < 3) {
+            startBreath();
+            window.setTimeout(finishBreath, 350);
+        }
+    });
+
+    continueBtn.addEventListener('click', goToNextQuestPage);
+}
+
+function renderEmotionSoundboardGame(container) {
+    const emotions = [
+        { id: 'joy', emoji: '😊', name: 'Joy' },
+        { id: 'sadness', emoji: '😢', name: 'Sadness' },
+        { id: 'fear', emoji: '😟', name: 'Fear' },
+        { id: 'excitement', emoji: '🤩', name: 'Excitement' }
+    ];
+    const correctEmotion = 'sadness';
+
+    container.innerHTML = `
+        <div class="game-container" data-game="emotion_soundboard">
+            <h3 class="game-title">Emotion Soundboard</h3>
+            <button class="sound-play-btn" type="button" id="emotion-sound-btn" aria-label="Play Toby's feeling sound">♪</button>
+            <p class="game-instruction">Toby's voice is soft and wobbly. Which feeling matches it?</p>
+            <div class="soundboard-grid">
+                ${emotions.map(emotion => `
+                    <button class="emotion-card" type="button" data-emotion="${emotion.id}">
+                        <span class="emotion-emoji">${emotion.emoji}</span>
+                        <span class="emotion-name">${emotion.name}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <p class="game-feedback" id="emotion-feedback">Listen first, then choose the matching face.</p>
+            <button class="btn btn-primary mini-game-continue hidden" type="button" id="emotion-continue-btn">Luna understands Toby!</button>
+        </div>
+    `;
+
+    const feedback = document.getElementById('emotion-feedback');
+    const continueBtn = document.getElementById('emotion-continue-btn');
+
+    document.getElementById('emotion-sound-btn').addEventListener('click', () => {
+        playTone(330, 180);
+        window.setTimeout(() => playTone(294, 220), 170);
+        feedback.textContent = "That sound is quiet, droopy, and a little teary.";
+    });
+
+    document.querySelectorAll('.emotion-card').forEach(card => {
+        card.addEventListener('click', () => {
+            if (card.dataset.emotion === correctEmotion) {
+                card.classList.add('correct');
+                feedback.textContent = "Yes. Toby sounds sad, and Luna can show she understands.";
+                continueBtn.classList.remove('hidden');
+                document.querySelectorAll('.emotion-card').forEach(btn => btn.disabled = true);
+                playTone(523.25, 160);
+            } else {
+                card.classList.add('try-again');
+                feedback.textContent = "Not quite. Listen for the soft, teary sound and try again.";
+                playTone(246.94, 110);
+            }
+        });
+    });
+
+    continueBtn.addEventListener('click', goToNextQuestPage);
+}
+
 // Audio Tone Synthesis
 function playTone(frequency, durationMs) {
     try {
