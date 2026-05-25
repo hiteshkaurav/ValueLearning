@@ -171,6 +171,10 @@
                     <p>Look at all the magical animals you've met and the MindSpark gems you've earned!</p>
                 </div>
                 
+                <div class="gem-summary" id="collection-gem-summary" aria-live="polite">
+                    <!-- Gem totals populated by app.js -->
+                </div>
+
                 <div class="collection-grid" id="collection-slots-container">
                     <!-- 16 Slots populated by app.js -->
                 </div>
@@ -235,6 +239,7 @@
                             </h3>
                             <p style="color: var(--text-muted); font-size: 0.95rem;">Use these cozy questions at the dinner table or bedtime to reinforce today's habit offline!</p>
                             
+                            <div id="parent-conversation-list">
                             <div class="conversation-card">
                                 <h4>🐐 Reinforcing "Persisting" (Courage)</h4>
                                 <p>"I saw you helped Rocky climb the peak today. What was something tricky you did today, and how did you keep going?"</p>
@@ -244,6 +249,7 @@
                                 <h4>🦉 Reinforcing "Managing Impulsivity" (Compassion)</h4>
                                 <p>"Sage needed three slow breaths to cool down before eating the pie. Let's practice taking three slow breaths together! When can we use this?"</p>
                             </div>
+                            </div>
                         </div>
                         
                         <!-- Real-world activity worksheets -->
@@ -251,7 +257,7 @@
                             <h3 style="font-size: 1.4rem; color: var(--text-main); border-bottom: 2px dashed var(--border-color); padding-bottom: 10px; margin-top: 10px;">
                                 Offline Family Activity Cards
                             </h3>
-                            <div class="sheet-cards-container">
+                            <div class="sheet-cards-container" id="parent-activity-list">
                                 <div class="sheet-card">
                                     <h4 style="color: var(--color-curiosity-dark);">🔍 Curiosity Sensory Walk</h4>
                                     <p>Take a 10-minute quiet walk in a local park or your backyard. Challenge your child to identify 3 things they can hear, 3 they can see, and 3 they can smell or feel.</p>
