@@ -75,6 +75,7 @@ const expectedJsDefinitions = [
     'appState',
     'STORY_SCRIPTS',
     'SEED_SLOTS_DATA',
+    'MINI_QUESTS',
     'persisting',
     'impulsivity',
     'listening',
@@ -87,6 +88,8 @@ const expectedJsDefinitions = [
     'renderStoneWeaverGame',
     'renderBreathingBalloonGame',
     'renderEmotionSoundboardGame',
+    'renderHabitChallengeGame',
+    'getQuestDefinition',
     'getHabitRule',
     'syncParentConversationStarters',
     'syncParentActivityCards',
@@ -107,7 +110,17 @@ expectedGameIds.forEach(gameId => {
 assert(js.includes('dailyHabitId = HABITS_OF_MIND[habitIndex].id'), "Daily quest rotates across all 16 habits");
 assert(!js.includes('availableDeepQuests'), "Daily rotation is not limited to only the three deep quests");
 assert(js.includes('Rocky, Sage, and Luna story quests are open for practice any day'), "Deep quests remain playable any day");
-assert(js.includes('full story quest is coming soon'), "Non-deep habit previews explain future unlock state");
+assert(js.includes('has a quick habit mini-game ready to play'), "Non-deep habit previews explain mini-game availability");
+assert(js.includes('habit_challenge: renderHabitChallengeGame'), "Shared habit challenge mini-game is wired");
+assert(css.includes('.habit-card-grid') && css.includes('.habit-card.correct'), "Shared habit challenge cards are styled");
+const miniQuestIds = [
+    'flexibility', 'metacognition', 'accuracy', 'questioning', 'past_knowledge',
+    'communication', 'senses', 'creating', 'wonderment', 'risk_taking',
+    'humour', 'interdependence', 'open_learning'
+];
+miniQuestIds.forEach(id => {
+    assert(js.includes(`${id}: {`) || js.includes(`'${id}': {`), `Mini-game quest config exists for "${id}"`);
+});
 assert(js.includes('sparkle-burst'), "Garden click feedback uses a visual burst");
 assert(js.includes('collection-gem-summary'), "Sticker book renders gem summary totals");
 assert(['curiosity', 'collaboration', 'creativity', 'compassion', 'courage'].every(value => js.includes(`value: '${value}'`)), "Parent activity cards cover all five values");

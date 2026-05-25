@@ -356,6 +356,204 @@ const SEED_SLOTS_DATA = [
     { habitId: 'open_learning', plantName: 'Sproutling', levels: ['Seed', 'Sprout', 'Green Leaves', 'Sproutling 🌱'] }
 ];
 
+const MINI_QUESTS = {
+    flexibility: {
+        title: "Flexi's Change-the-View Reef",
+        gameTitle: "Flexible Thinking Flip",
+        scene: "Flexi finds a puzzle gate that looks impossible from the front. Help Flexi try different viewpoints until the path opens.",
+        prompt: "Pick the ideas that show flexible thinking.",
+        instruction: "Choose two flexible moves.",
+        correctIds: ['new-angle', 'swap-plan'],
+        items: [
+            { id: 'new-angle', icon: '↻', label: 'Look from a new angle' },
+            { id: 'stuck', icon: '■', label: 'Say there is only one way' },
+            { id: 'swap-plan', icon: '◇', label: 'Try a different plan' },
+            { id: 'quit', icon: '×', label: 'Stop after one try' }
+        ],
+        success: "Flexi twists the puzzle in a new direction, and the reef gate swings open."
+    },
+    metacognition: {
+        title: "Mirror's Thinking Lantern",
+        gameTitle: "Thought Tracker",
+        scene: "Mirror the Chameleon wants to notice what is happening inside their mind while solving a maze.",
+        prompt: "Pick the thoughts that help Mirror understand their own learning.",
+        instruction: "Choose two thinking-about-thinking moves.",
+        correctIds: ['notice', 'strategy'],
+        items: [
+            { id: 'notice', icon: '?', label: 'Notice what feels tricky' },
+            { id: 'rush', icon: '!', label: 'Rush without checking' },
+            { id: 'strategy', icon: '◎', label: 'Name the strategy used' },
+            { id: 'hide', icon: '...', label: 'Ignore mistakes' }
+        ],
+        success: "Mirror spots the learning pattern and changes color with a proud little shimmer."
+    },
+    accuracy: {
+        title: "Archer's Careful Aim",
+        gameTitle: "Accuracy Check",
+        scene: "Archer the Hawk is sending a message across Brave Cliffs and wants every mark to be clear.",
+        prompt: "Pick the actions that help Archer strive for accuracy.",
+        instruction: "Choose two careful checking moves.",
+        correctIds: ['check', 'slow'],
+        items: [
+            { id: 'check', icon: '✓', label: 'Check the details twice' },
+            { id: 'guess', icon: '?', label: 'Guess and hope' },
+            { id: 'slow', icon: '◎', label: 'Slow down for careful aim' },
+            { id: 'smudge', icon: '~', label: 'Leave messy marks' }
+        ],
+        success: "Archer checks the message, takes a steady breath, and sends it perfectly."
+    },
+    questioning: {
+        title: "Spark's Question Glow",
+        gameTitle: "Question Builder",
+        scene: "Spark the Firefly sees a mysterious glowing seed and wants to learn more about it.",
+        prompt: "Pick the questions that help Spark investigate.",
+        instruction: "Choose two curious questions.",
+        correctIds: ['why', 'what-if'],
+        items: [
+            { id: 'why', icon: '?', label: 'Why does it glow?' },
+            { id: 'ignore', icon: 'zzz', label: 'Ignore the mystery' },
+            { id: 'what-if', icon: '+', label: 'What if we test light?' },
+            { id: 'answer', icon: '!', label: 'Pretend we already know' }
+        ],
+        success: "Spark's good questions make the seed glow brighter and reveal a tiny clue."
+    },
+    past_knowledge: {
+        title: "Atlas and the Old Map",
+        gameTitle: "Memory Bridge",
+        scene: "Atlas the Tortoise finds a river crossing that looks like a puzzle from yesterday's trail.",
+        prompt: "Pick the ways Atlas can use past knowledge.",
+        instruction: "Choose two remember-and-apply moves.",
+        correctIds: ['remember', 'connect'],
+        items: [
+            { id: 'remember', icon: 'map', label: 'Remember a similar puzzle' },
+            { id: 'forget', icon: 'x', label: 'Throw away old clues' },
+            { id: 'connect', icon: '∞', label: 'Connect old and new ideas' },
+            { id: 'random', icon: '?', label: 'Pick randomly' }
+        ],
+        success: "Atlas remembers the old stepping pattern and calmly crosses the river."
+    },
+    communication: {
+        title: "Crystal's Clear Message",
+        gameTitle: "Clarity Chorus",
+        scene: "Crystal the Parrot needs to explain a plan so the whole Harmony Hive can help.",
+        prompt: "Pick the choices that make Crystal's message clear.",
+        instruction: "Choose two clear communication moves.",
+        correctIds: ['simple', 'listen-back'],
+        items: [
+            { id: 'simple', icon: 'abc', label: 'Use simple, exact words' },
+            { id: 'mumble', icon: '...', label: 'Mumble very fast' },
+            { id: 'listen-back', icon: '?', label: 'Ask if it made sense' },
+            { id: 'shout', icon: '!!', label: 'Shout over everyone' }
+        ],
+        success: "Crystal speaks clearly, checks for understanding, and the team knows what to do."
+    },
+    senses: {
+        title: "Scout's Sensory Trail",
+        gameTitle: "Senses Search",
+        scene: "Scout the Fox follows a soft trail through Whispering Woods using careful observations.",
+        prompt: "Pick the clues Scout can gather through the senses.",
+        instruction: "Choose two sensory clues.",
+        correctIds: ['sound', 'texture'],
+        items: [
+            { id: 'sound', icon: 'ear', label: 'A rustling sound' },
+            { id: 'guess', icon: '?', label: 'A wild guess' },
+            { id: 'texture', icon: 'hand', label: 'A bumpy leaf texture' },
+            { id: 'ignore', icon: 'x', label: 'Eyes closed, ears covered' }
+        ],
+        success: "Scout listens, feels, notices, and finds the hidden forest path."
+    },
+    creating: {
+        title: "Prism's Invention Meadow",
+        gameTitle: "Idea Mixer",
+        scene: "Prism the Butterfly wants to invent a new garden tool from ordinary supplies.",
+        prompt: "Pick the moves that help Prism create and innovate.",
+        instruction: "Choose two creative building moves.",
+        correctIds: ['combine', 'prototype'],
+        items: [
+            { id: 'combine', icon: '+', label: 'Combine two ideas' },
+            { id: 'copy', icon: '=', label: 'Only copy the first idea' },
+            { id: 'prototype', icon: 'tool', label: 'Build a tiny test version' },
+            { id: 'fear', icon: 'x', label: 'Avoid unusual ideas' }
+        ],
+        success: "Prism mixes colors, tests a tiny model, and invents a seed-sprinkler wing."
+    },
+    wonderment: {
+        title: "Nova's Wonder Tidepool",
+        gameTitle: "Awe Finder",
+        scene: "Nova the Starfish discovers a tidepool full of tiny sparkling surprises.",
+        prompt: "Pick the choices that show wonder and awe.",
+        instruction: "Choose two wonder-filled moves.",
+        correctIds: ['notice-beauty', 'ask-more'],
+        items: [
+            { id: 'notice-beauty', icon: '*', label: 'Notice tiny beautiful details' },
+            { id: 'bored', icon: '-', label: 'Say nothing is interesting' },
+            { id: 'ask-more', icon: '?', label: 'Wonder what else is here' },
+            { id: 'rush-away', icon: '>>', label: 'Rush past everything' }
+        ],
+        success: "Nova slows down, notices the shimmer, and the tidepool feels magical."
+    },
+    risk_taking: {
+        title: "Brave's Safe Leap",
+        gameTitle: "Responsible Risk Sort",
+        scene: "Brave the Lion wants to try a new bridge, but first he checks how to do it safely.",
+        prompt: "Pick the choices that show responsible risk-taking.",
+        instruction: "Choose two brave-and-safe moves.",
+        correctIds: ['small-step', 'ask-help'],
+        items: [
+            { id: 'small-step', icon: '1', label: 'Try one small step first' },
+            { id: 'reckless', icon: '!', label: 'Leap without looking' },
+            { id: 'ask-help', icon: '+', label: 'Ask a helper to spot you' },
+            { id: 'never', icon: 'x', label: 'Never try anything new' }
+        ],
+        success: "Brave checks the bridge, takes a small step, and crosses with confidence."
+    },
+    humour: {
+        title: "Giggles and the Silly Slip",
+        gameTitle: "Humour Helper",
+        scene: "Giggles the Dolphin splashes the wrong way during practice and wants to keep learning with a smile.",
+        prompt: "Pick the choices that use humour kindly.",
+        instruction: "Choose two kind humour moves.",
+        correctIds: ['laugh-self', 'try-again'],
+        items: [
+            { id: 'laugh-self', icon: ':)', label: 'Smile at your own mistake' },
+            { id: 'tease', icon: '!', label: 'Make fun of someone else' },
+            { id: 'try-again', icon: '↻', label: 'Try again with a lighter heart' },
+            { id: 'storm', icon: 'x', label: 'Get angry and stop' }
+        ],
+        success: "Giggles laughs kindly, tries another splash, and learns the move."
+    },
+    interdependence: {
+        title: "Harmony's Team Hive",
+        gameTitle: "Teamwork Builder",
+        scene: "Harmony the Bee needs the hive to move a heavy golden pollen basket together.",
+        prompt: "Pick the choices that help a team think interdependently.",
+        instruction: "Choose two teamwork moves.",
+        correctIds: ['share-roles', 'listen-team'],
+        items: [
+            { id: 'share-roles', icon: 'team', label: 'Share helpful roles' },
+            { id: 'solo', icon: 'solo', label: 'Do everything alone' },
+            { id: 'listen-team', icon: 'ear', label: 'Listen to team ideas' },
+            { id: 'bossy', icon: 'me', label: 'Ignore everyone else' }
+        ],
+        success: "Harmony gives everyone a role, and the hive moves the basket together."
+    },
+    open_learning: {
+        title: "Sprout's Tomorrow Garden",
+        gameTitle: "Keep Learning Path",
+        scene: "Sprout wants to grow a new leaf every day by staying open to learning.",
+        prompt: "Pick the choices that show continuous learning.",
+        instruction: "Choose two growth-minded moves.",
+        correctIds: ['practice', 'feedback'],
+        items: [
+            { id: 'practice', icon: 'grow', label: 'Practice a little again' },
+            { id: 'done', icon: 'end', label: 'Say learning is finished forever' },
+            { id: 'feedback', icon: '+', label: 'Use helpful feedback' },
+            { id: 'hide', icon: 'box', label: 'Hide from new ideas' }
+        ],
+        success: "Sprout uses feedback, practices again, and grows a bright new leaf."
+    }
+};
+
 // --- Initialization & Local Storage Synergies ---
 document.addEventListener('DOMContentLoaded', () => {
     loadProgress();
@@ -551,10 +749,11 @@ function displayMapCard(habit) {
     avatar.textContent = habit.emoji;
     name.textContent = `${habit.name} the ${habit.animal}`;
     const isDeepQuest = ['persisting', 'impulsivity', 'listening'].includes(habit.id);
+    const isMiniQuest = !!MINI_QUESTS[habit.id];
     const dailyCopy = habit.id === dailyHabitId ? '<br><span style="font-size:0.8rem; color:var(--color-courage-dark); font-weight:800;">Today\'s Daily Quest highlight!</span>' : '';
     const previewCopy = isDeepQuest
         ? 'Rocky, Sage, and Luna story quests are open for practice any day.'
-        : `This is ${habit.name}'s ${habit.biome} preview. ${habit.name} teaches ${habit.habit}; a full story quest is coming soon.`;
+        : `${habit.name} has a quick habit mini-game ready to play.`;
 
     habitTxt.innerHTML = `<strong>Habit of Mind:</strong> ${habit.habit}<br><span style="font-size:0.8rem; color:var(--text-muted);">${habit.desc} ${previewCopy}</span>${dailyCopy}`;
     
@@ -565,8 +764,8 @@ function displayMapCard(habit) {
 
     appState.activeQuest = habit;
 
-    if (isDeepQuest) {
-        btn.textContent = "Start Story Quest";
+    if (isDeepQuest || isMiniQuest) {
+        btn.textContent = isDeepQuest ? "Start Story Quest" : "Start Mini Game";
         btn.style.display = 'block';
     } else {
         btn.textContent = "Preview Only";
@@ -585,6 +784,64 @@ function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+function getQuestDefinition(habit) {
+    if (!habit) return null;
+    if (STORY_SCRIPTS[habit.id]) return STORY_SCRIPTS[habit.id];
+
+    const miniQuest = MINI_QUESTS[habit.id];
+    if (!miniQuest) return null;
+
+    return {
+        title: miniQuest.title,
+        character: `${habit.name} the ${habit.animal}`,
+        habit: habit.habit,
+        value: habit.value,
+        pages: [
+            {
+                text: {
+                    '5-7': `${miniQuest.scene}<br><br>${miniQuest.prompt}`,
+                    '8-10': `${miniQuest.scene}<br><br>${miniQuest.prompt} Think carefully about which choices best match <strong>${habit.habit}</strong>.`
+                },
+                choices: [
+                    { text: "Start the mini-game!", nextPage: 1 }
+                ],
+                illustration: `
+                    <svg viewBox="0 0 200 200" width="100%">
+                        <rect width="200" height="200" fill="var(--color-${habit.value}-soft)" rx="20"/>
+                        <circle cx="100" cy="100" r="58" fill="white" opacity="0.72"/>
+                        <text x="100" y="116" font-size="54" text-anchor="middle">${habit.emoji}</text>
+                    </svg>
+                `
+            },
+            {
+                text: {
+                    '5-7': miniQuest.instruction,
+                    '8-10': `${miniQuest.instruction} Each good choice should help ${habit.name} practice ${habit.habit}.`
+                },
+                choices: [],
+                game: 'habit_challenge'
+            },
+            {
+                text: {
+                    '5-7': `${miniQuest.success}<br><br>${habit.name} practiced ${habit.habit}!`,
+                    '8-10': `${miniQuest.success}<br><br>You helped ${habit.name} use the Habit of Mind: <strong>${habit.habit}</strong>.`
+                },
+                choices: [
+                    { text: `Claim your ${capitalize(habit.value)} Gem and Sticker!`, action: 'completeQuest' }
+                ],
+                illustration: `
+                    <svg viewBox="0 0 200 200" width="100%">
+                        <rect width="200" height="200" fill="var(--color-${habit.value}-soft)" rx="20"/>
+                        <path d="M40 150 Q100 88 160 150" fill="none" stroke="var(--color-${habit.value})" stroke-width="10" stroke-linecap="round"/>
+                        <text x="100" y="116" font-size="58" text-anchor="middle">${habit.emoji}</text>
+                        <text x="100" y="164" font-size="20" text-anchor="middle">Great thinking!</text>
+                    </svg>
+                `
+            }
+        ]
+    };
+}
+
 // Start active storybook
 function startActiveQuest() {
     if (!appState.activeQuest) return;
@@ -600,7 +857,7 @@ function startActiveQuest() {
 }
 
 function renderQuestPage() {
-    const quest = STORY_SCRIPTS[appState.activeQuest.id];
+    const quest = getQuestDefinition(appState.activeQuest);
     if (!quest) return;
 
     const page = quest.pages[appState.currentQuestPage];
@@ -650,7 +907,7 @@ function renderQuestPage() {
 }
 
 function goToNextQuestPage() {
-    const quest = STORY_SCRIPTS[appState.activeQuest.id];
+    const quest = getQuestDefinition(appState.activeQuest);
     if (!quest) return;
 
     appState.currentQuestPage = Math.min(appState.currentQuestPage + 1, quest.pages.length - 1);
@@ -661,7 +918,8 @@ function loadMiniGame(gameType, container) {
     const gameLoaders = {
         stone_weaver: renderStoneWeaverGame,
         breathing_balloon: renderBreathingBalloonGame,
-        emotion_soundboard: renderEmotionSoundboardGame
+        emotion_soundboard: renderEmotionSoundboardGame,
+        habit_challenge: renderHabitChallengeGame
     };
 
     const loader = gameLoaders[gameType];
@@ -870,6 +1128,87 @@ function renderEmotionSoundboardGame(container) {
                 card.classList.add('try-again');
                 feedback.textContent = "Not quite. Listen for the soft, teary sound and try again.";
                 playTone(246.94, 110);
+            }
+        });
+    });
+
+    continueBtn.addEventListener('click', goToNextQuestPage);
+}
+
+function renderHabitChallengeGame(container) {
+    const habit = appState.activeQuest;
+    const config = MINI_QUESTS[habit.id];
+    const selected = new Set();
+
+    if (!config) {
+        container.innerHTML = `
+            <div class="game-container">
+                <h3 class="game-title">Mini-game not found</h3>
+                <button class="btn btn-primary" type="button" id="habit-fallback-btn">Continue Story</button>
+            </div>
+        `;
+        document.getElementById('habit-fallback-btn').addEventListener('click', goToNextQuestPage);
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="game-container habit-game" data-game="habit_challenge">
+            <div class="habit-game-avatar" aria-hidden="true">${habit.emoji}</div>
+            <h3 class="game-title">${config.gameTitle}</h3>
+            <p class="game-instruction">${config.instruction}</p>
+            <div class="habit-card-grid">
+                ${config.items.map(item => `
+                    <button class="habit-card" type="button" data-choice="${item.id}">
+                        <span class="habit-card-icon">${item.icon}</span>
+                        <span class="habit-card-label">${item.label}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <p class="game-feedback" id="habit-game-feedback">Choose ${config.correctIds.length} helpful choices.</p>
+            <button class="btn btn-primary mini-game-continue hidden" type="button" id="habit-continue-btn">Continue</button>
+        </div>
+    `;
+
+    const feedback = document.getElementById('habit-game-feedback');
+    const continueBtn = document.getElementById('habit-continue-btn');
+
+    document.querySelectorAll('.habit-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const choiceId = card.dataset.choice;
+            if (selected.has(choiceId)) {
+                selected.delete(choiceId);
+                card.classList.remove('selected');
+            } else if (selected.size < config.correctIds.length) {
+                selected.add(choiceId);
+                card.classList.add('selected');
+            }
+
+            if (selected.size < config.correctIds.length) {
+                feedback.textContent = `Choose ${config.correctIds.length - selected.size} more helpful choice${config.correctIds.length - selected.size === 1 ? '' : 's'}.`;
+                return;
+            }
+
+            const isCorrect = config.correctIds.every(id => selected.has(id));
+            if (isCorrect) {
+                feedback.textContent = config.success;
+                continueBtn.classList.remove('hidden');
+                document.querySelectorAll('.habit-card').forEach(choice => {
+                    choice.disabled = true;
+                    if (config.correctIds.includes(choice.dataset.choice)) {
+                        choice.classList.add('correct');
+                    }
+                });
+                playTone(523.25, 140);
+                window.setTimeout(() => playTone(659.25, 180), 130);
+            } else {
+                feedback.textContent = `Almost. ${habit.name} thinks there may be a better pair. Try again.`;
+                selected.clear();
+                document.querySelectorAll('.habit-card').forEach(choice => {
+                    choice.classList.remove('selected');
+                    choice.classList.add('try-again');
+                    window.setTimeout(() => choice.classList.remove('try-again'), 350);
+                });
+                playTone(220, 120);
             }
         });
     });
